@@ -1,10 +1,8 @@
-// matrix2D.cpp
+// matrix2D.c
 // Permite ingresar una matriz de m x n
 // y luego la escribe en un archivo
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-using namespace std;
 
 // estructura de la matriz
 typedef struct {
@@ -15,8 +13,8 @@ typedef struct {
 
 // prototipos
 Matrix2D* inputMatrix2D(void);
-int matrix2DToDisk(Matrix2D*);
-int freeMatrix2D(Matrix2D*);
+int matrix2DToDisk(Matrix2D* matrixPtr);
+int freeMatrix2D(Matrix2D* matrixPtr);
 
 int main() {
    Matrix2D *matrix_A_ptr;          // matriz a ingresar por el usuario
@@ -39,10 +37,8 @@ Matrix2D* inputMatrix2D(void) {
    matrix_in_ptr = (Matrix2D*)calloc(1, sizeof(Matrix2D));
 
    // interfaz con el usuario
-   //printf("%s", "Numero de renglones de la matriz: ");
-   cout << "Numero de renglones de la matriz: ";
-   //scanf("%d", &matrix_in_ptr->n_rows);
-   cin >> matrix_in_ptr->n_rows;
+   printf("%s", "Numero de renglones de la matriz: ");
+   scanf("%d", &matrix_in_ptr->n_rows);
    printf("%s", "Numero de columnas de la matriz: ");
    scanf("%d", &matrix_in_ptr->n_cols);
 
