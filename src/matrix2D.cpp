@@ -15,17 +15,26 @@ typedef struct {
 
 // prototipos
 Matrix2D* inputMatrix2D(void);
+Matrix2D* matrixMultiplication(Matrix2D*, Matrix2D*);
 int matrix2DToDisk(Matrix2D*);
 int freeMatrix2D(Matrix2D*);
 
 int main() {
    Matrix2D *matrix_A_ptr;          // matriz a ingresar por el usuario
+   Matrix2D *matrix_B_ptr;          // matriz a ingresar por el usuario
+   Matrix2D *matrix_AB_ptr;         // matrix multiplication result
 
-   matrix_A_ptr = inputMatrix2D();  // ingresar la matriz
+   matrix_A_ptr = inputMatrix2D();  // enter the first matrix
+   matrix_B_ptr = inputMatrix2D();  // enter the second matrix
 
-   matrix2DToDisk(matrix_A_ptr);    // escribe la matriz en disco
+   // matrix multiplication
+   matrix_AB_ptr = matrixMultiplication(matrix_A_ptr, matrix_B_ptr);
+
+   matrix2DToDisk(matrix_AB_ptr);   // escribe la matriz en disco
 
    freeMatrix2D(matrix_A_ptr);      // libera la memoria
+   freeMatrix2D(matrix_B_ptr);      // libera la memoria
+   freeMatrix2D(matrix_AB_ptr);     // libera la memoria
 }  // end main
 
 // captura los elementos de la matriz
@@ -89,6 +98,36 @@ int matrix2DToDisk(Matrix2D *matrixPtr) {
 
    return 0;   // exito en la escritura
 }  // end of function matrix2DToDisk
+
+// Matrix multiplication algorithm
+Matrix2D* matrixMultiplication(Matrix2D* matrixA, Matrix2D* matrixB) {
+   Matrix2D* matrixAB;  // matrix product
+
+   // dynamic allocation memory
+   matrixAB = (Matrix2D*)calloc(1, sizeof(Matrix2D));
+
+   // sizing matrix A*B
+   matrixAB->n_rows = matrixA->n_rows;
+   matrixAB->n_cols = matrixB->n_cols;
+
+   // dynamic memory allocation
+   matrixAB->matrix = (double**)calloc(matrixAB->n_rows, sizeof(double*));
+
+   for (size_t k = 0; k < matrixAB->n_rows; ++k) {
+      matrixAB->matrix[k] = (double*)calloc(matrixAB->n_cols, sizeof(double));
+   }  // end for
+
+   // raw algorithm
+   for (size_t i = 0; i < matrixA->n_rows; ++i) {
+      for (size_t j = 0; j < matrixB->n_cols; ++j) {
+         for (size_t k = 0; k < matrixA->n_cols; ++k) {
+            matrixAB->matrix[i][j] += matrixA->matrix[i][k] * matrixB->matrix[k][j];
+         }  // end for
+      }  // end for
+   }  // end for
+
+   return matrixAB;
+}  // end of matrixMultiplication function
 
 // libera la memoria asignada dinamicamente
 int freeMatrix2D(Matrix2D *matrixPtr) {
