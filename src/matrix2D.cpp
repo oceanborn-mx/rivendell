@@ -32,9 +32,15 @@ int main() {
 
    matrix2DToDisk(matrix_AB_ptr);   // escribe la matriz en disco
 
-   freeMatrix2D(matrix_A_ptr);      // libera la memoria
-   freeMatrix2D(matrix_B_ptr);      // libera la memoria
-   freeMatrix2D(matrix_AB_ptr);     // libera la memoria
+   // freeing memory allocaded dynamically
+   freeMatrix2D(matrix_A_ptr);
+   freeMatrix2D(matrix_B_ptr);
+   freeMatrix2D(matrix_AB_ptr);
+
+   // zero pointers after free to avoid reuse
+   matrix_A_ptr = NULL;
+   matrix_B_ptr = NULL;
+   matrix_AB_ptr = NULL;
 }  // end main
 
 // captura los elementos de la matriz
