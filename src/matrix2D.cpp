@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include "IllegalSizeException.h"   // IllegalSizeException class
 using namespace std;
 
 // estructura de la matriz
@@ -47,16 +48,16 @@ int main() {
 Matrix2D* inputMatrix2D(void) {
    Matrix2D *matrix_in_ptr;
 
-   // asignacion dinamica
+   // dynamic memory allocation
    matrix_in_ptr = (Matrix2D*)calloc(1, sizeof(Matrix2D));
 
-   // interfaz con el usuario
+   // end-user interface
    cout << "Numero de renglones de la matriz: ";
    cin >> matrix_in_ptr->n_rows;
    cout << "Numero de columnas de la matriz: ";
    cin >> matrix_in_ptr->n_cols;
 
-   // asignacion dinamica
+   // dynamic memory allocation
    matrix_in_ptr->matrix = (double**)calloc(matrix_in_ptr->n_rows,
                                             sizeof(double*));
 
@@ -65,7 +66,7 @@ Matrix2D* inputMatrix2D(void) {
                                                  sizeof(double));
    }  // end for
 
-   // ingresar la matriz
+   // enter the matrix
    for (size_t m = 0; m < matrix_in_ptr->n_rows; ++m) {
       for (size_t n = 0; n < matrix_in_ptr->n_cols; ++n) {
          cout << "elemento [" << m << "][" << n << "]: ";
@@ -78,9 +79,9 @@ Matrix2D* inputMatrix2D(void) {
 
 // escribe la matriz a un archivo de disco
 int matrix2DToDisk(Matrix2D *matrixPtr) {
-   FILE *file_ptr;   // archivo de disco
+   FILE *file_ptr;   // disk file
 
-   // apertura del archivo
+   // opening the file
    file_ptr = (FILE*)fopen("Matrix.txt", "w");
 
    if (file_ptr == NULL) {
@@ -88,9 +89,7 @@ int matrix2DToDisk(Matrix2D *matrixPtr) {
       exit(0);
    }  // end if
 
-   // escritura del archivo
-   //fprintf(file_ptr, "\n");
-
+   // writing the file
    for (size_t rows = 0; rows < matrixPtr->n_rows; ++rows) {
       for (size_t cols = 0; cols < matrixPtr->n_cols; ++cols) {
          fprintf(file_ptr, "%7.2f\t", 
@@ -99,7 +98,7 @@ int matrix2DToDisk(Matrix2D *matrixPtr) {
       fprintf(file_ptr, "\n");
    }  // end for
 
-   // cerrar el archivo
+   // closing the file
    fclose(file_ptr);
 
    return 0;   // exito en la escritura
@@ -108,6 +107,10 @@ int matrix2DToDisk(Matrix2D *matrixPtr) {
 // Matrix multiplication algorithm
 Matrix2D* matrixMultiplication(Matrix2D* matrixA, Matrix2D* matrixB) {
    Matrix2D* matrixAB;  // matrix product
+
+   // checking proper size
+   if (matrixA->n_cols != matrixB->n_rows)
+      throw IllegalSizeException(); // terminate function
 
    // dynamic allocation memory
    matrixAB = (Matrix2D*)calloc(1, sizeof(Matrix2D));
