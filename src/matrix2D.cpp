@@ -7,14 +7,14 @@
 #include "IllegalSizeException.h"   // IllegalSizeException class
 using namespace std;
 
-// estructura de la matriz
+// matrix structure
 typedef struct {
-   int n_rows;       // numero de renglones
-   int n_cols;       // numero de columnas
-   double **matrix;  // matriz de n_rows x n_cols
+   int n_rows;       // number of rows
+   int n_cols;       // number of columns
+   double **matrix;  // n_rows x n_cols matrix
 } Matrix2D;
 
-// prototipos
+// prototypes
 Matrix2D* inputMatrix2D(void);
 Matrix2D* matrixMultiplication(Matrix2D*, Matrix2D*);
 int matrix2DToDisk(Matrix2D*);
@@ -29,15 +29,21 @@ int main() {
    matrix_B_ptr = inputMatrix2D();  // enter the second matrix
 
    // matrix multiplication
-   matrix_AB_ptr = matrixMultiplication(matrix_A_ptr, matrix_B_ptr);
+   try {
+      matrix_AB_ptr = matrixMultiplication(matrix_A_ptr, matrix_B_ptr);
 
-   matrix2DToDisk(matrix_AB_ptr);   // escribe la matriz en disco
+      matrix2DToDisk(matrix_AB_ptr);   // write the matrix into a disk file
+
+      freeMatrix2D(matrix_AB_ptr);     // release allocated memory
+   }  // end try
+   catch (IllegalSizeException &illegalSizeException) {
+      cout << "Exception occurred: " << illegalSizeException.what() << endl;
+   }  // end catch
 
    // freeing memory allocaded dynamically
    freeMatrix2D(matrix_A_ptr);
    freeMatrix2D(matrix_B_ptr);
-   freeMatrix2D(matrix_AB_ptr);
-
+   
    // zero pointers after free to avoid reuse
    matrix_A_ptr = NULL;
    matrix_B_ptr = NULL;
