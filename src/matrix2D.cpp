@@ -18,6 +18,7 @@ typedef struct {
 Matrix2D* inputMatrix2D(void);
 Matrix2D* matrixMultiplication(Matrix2D*, Matrix2D*);
 Matrix2D* upperTriangularMatrix(Matrix2D*);
+double matrixDeterminant(Matrix2D* matrixD);
 int matrix2DToDisk(Matrix2D*);
 int freeMatrix2D(Matrix2D*);
 
@@ -26,6 +27,7 @@ int main() {
    Matrix2D *matrix_B_ptr;          // imput by user matrix
    Matrix2D *matrix_AB_ptr;         // matrix multiplication result
    Matrix2D *matrix_L_ptr;          // matrix L (upper)
+   double determinant;              // determinant
 
    matrix_A_ptr = inputMatrix2D();  // enter the first matrix
    matrix_B_ptr = inputMatrix2D();  // enter the second matrix
@@ -44,6 +46,10 @@ int main() {
 
    try {
       matrix_L_ptr = upperTriangularMatrix(matrix_A_ptr);
+
+      determinant = matrixDeterminant(matrix_A_ptr);
+
+      cout << "determinant: " << determinant << endl;
 
       matrix2DToDisk(matrix_L_ptr);
 
@@ -96,33 +102,6 @@ Matrix2D* inputMatrix2D(void) {
 
    return matrix_in_ptr;
 }  // end of function inputMatrix2D
-
-// write the matrix into a file disk
-int matrix2DToDisk(Matrix2D *matrixPtr) {
-   FILE *file_ptr;   // disk file
-
-   // opening the file
-   file_ptr = (FILE*)fopen("Matrix.txt", "w");
-
-   if (file_ptr == NULL) {
-      cout << "Error en la apertura del archivo!";
-      exit(0);
-   }  // end if
-
-   // writing the file
-   for (size_t rows = 0; rows < matrixPtr->n_rows; ++rows) {
-      for (size_t cols = 0; cols < matrixPtr->n_cols; ++cols) {
-         fprintf(file_ptr, "%7.2f\t", 
-                 matrixPtr->matrix[rows][cols]);
-      }  // end for
-      fprintf(file_ptr, "\n");
-   }  // end for
-
-   // closing the file
-   fclose(file_ptr);
-
-   return 0;   // exito en la escritura
-}  // end of function matrix2DToDisk
 
 // Matrix multiplication algorithm
 Matrix2D* matrixMultiplication(Matrix2D* matrixA, Matrix2D* matrixB) {
@@ -201,6 +180,64 @@ Matrix2D* upperTriangularMatrix(Matrix2D* matrixF) {
 
    return matrixU;
 }  // end of luMatrixFactorization function
+
+// Determinant
+double matrixDeterminant(Matrix2D* matrixD) {
+   double det;          // determinant
+   Matrix2D *matrixU;   // upper triangular matrix
+
+   // dynamic allocation memory
+   matrixU = (Matrix2D*)calloc(1, sizeof(Matrix2D));
+
+   // sizing matrix U
+   matrixU->n_rows = matrixD->n_rows;
+   matrixU->n_cols = matrixD->n_cols;
+
+   // dynamic memory allocation
+   matrixU->matrix = (double**)calloc(matrixU->n_rows, sizeof(double*));
+
+   for (size_t k = 0; k < matrixU->n_rows; ++k) {
+      matrixU->matrix[k] = (double*)calloc(matrixU->n_cols, sizeof(double));
+   }  // end for
+
+   matrixU = upperTriangularMatrix(matrixD);
+
+   // algorithm: getting the elements in the diagonal
+   det = 1; // initialization, just for multiplicative identity
+   
+   for (size_t i = 0; i < matrixU->n_rows; ++i) {
+      det *= matrixU->matrix[i][i];
+   }  // end for
+
+   return det;
+}  // end of function matrixDeterminant
+
+// write the matrix into a file disk
+int matrix2DToDisk(Matrix2D *matrixPtr) {
+   FILE *file_ptr;   // disk file
+
+   // opening the file
+   file_ptr = (FILE*)fopen("Matrix.txt", "w");
+
+   if (file_ptr == NULL) {
+      cout << "Error en la apertura del archivo!";
+      exit(0);
+   }  // end if
+
+   // writing the file
+   for (size_t rows = 0; rows < matrixPtr->n_rows; ++rows) {
+      for (size_t cols = 0; cols < matrixPtr->n_cols; ++cols) {
+         fprintf(file_ptr, "%7.2f\t", 
+                 matrixPtr->matrix[rows][cols]);
+      }  // end for
+      fprintf(file_ptr, "\n");
+   }  // end for
+
+   // closing the file
+   fclose(file_ptr);
+
+   return 0;   // exito en la escritura
+}  // end of function matrix2DToDisk
 
 // release the memory allocated dynamically
 int freeMatrix2D(Matrix2D* matrixPtr) {
