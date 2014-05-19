@@ -17,6 +17,7 @@ typedef struct {
 // prototypes
 Matrix2D* inputMatrix2D(void);
 Matrix2D* matrixMultiplication(Matrix2D*, Matrix2D*);
+Matrix2D* upperTriangularMatrix(Matrix2D*);
 int matrix2DToDisk(Matrix2D*);
 int freeMatrix2D(Matrix2D*);
 
@@ -24,6 +25,7 @@ int main() {
    Matrix2D *matrix_A_ptr;          // matriz a ingresar por el usuario
    Matrix2D *matrix_B_ptr;          // matriz a ingresar por el usuario
    Matrix2D *matrix_AB_ptr;         // matrix multiplication result
+   Matrix2D *matrix_L_ptr;          // matrix L (upper)
 
    matrix_A_ptr = inputMatrix2D();  // enter the first matrix
    matrix_B_ptr = inputMatrix2D();  // enter the second matrix
@@ -40,6 +42,17 @@ int main() {
       cout << "Exception occurred: " << illegalSizeException.what() << endl;
    }  // end catch
 
+   try {
+      matrix_L_ptr = upperTriangularMatrix(matrix_A_ptr);
+
+      matrix2DToDisk(matrix_L_ptr);
+
+      freeMatrix2D(matrix_L_ptr);
+   }  // end try
+   catch (IllegalSizeException &illegalSizeException) {
+      cout << "Exception occurred: " << illegalSizeException.what() << endl;
+   }  // end catch
+
    // freeing memory allocaded dynamically
    freeMatrix2D(matrix_A_ptr);
    freeMatrix2D(matrix_B_ptr);
@@ -48,6 +61,7 @@ int main() {
    matrix_A_ptr = NULL;
    matrix_B_ptr = NULL;
    matrix_AB_ptr = NULL;
+   matrix_L_ptr = NULL;
 }  // end main
 
 // captura los elementos de la matriz
@@ -112,13 +126,13 @@ int matrix2DToDisk(Matrix2D *matrixPtr) {
 
 // Matrix multiplication algorithm
 Matrix2D* matrixMultiplication(Matrix2D* matrixA, Matrix2D* matrixB) {
-   Matrix2D* matrixAB;  // matrix product
+   Matrix2D *matrixAB;  // matrix product
 
    // checking proper size
    if (matrixA->n_cols != matrixB->n_rows)
       throw IllegalSizeException(); // terminate function
 
-   // dynamic allocation memory
+   // dynamic memory allocation
    matrixAB = (Matrix2D*)calloc(1, sizeof(Matrix2D));
 
    // sizing matrix A*B
@@ -144,10 +158,54 @@ Matrix2D* matrixMultiplication(Matrix2D* matrixA, Matrix2D* matrixB) {
    return matrixAB;
 }  // end of matrixMultiplication function
 
-// libera la memoria asignada dinamicamente
-int freeMatrix2D(Matrix2D *matrixPtr) {
+// LU Matrix factorization
+Matrix2D* upperTriangularMatrix(Matrix2D* matrixF) {
+   Matrix2D *matrixU;   // upper matrix
 
-   // se libera lo mas anidado primero
+   // checking proper size
+   if (matrixF->n_rows != matrixF->n_cols)
+      throw IllegalSizeException(); // terminate function
+
+   // dynamic allocation memory
+   matrixU = (Matrix2D*)calloc(1, sizeof(Matrix2D));
+
+   // sizing matrix U
+   matrixU->n_rows = matrixF->n_rows;
+   matrixU->n_cols = matrixF->n_cols;
+
+   // dynamic memory allocation
+   matrixU->matrix = (double**)calloc(matrixU->n_rows, sizeof(double*));
+
+   for (size_t k = 0; k < matrixU->n_rows; ++k) {
+      matrixU->matrix[k] = (double*)calloc(matrixU->n_cols, sizeof(double));
+   }  // end for
+
+   // TODO: Optimize assigment, if possible
+   for (size_t i = 0; i < matrixU->n_rows; ++i) {
+      for (size_t j = 0; j < matrixU->n_cols; ++j) {
+         matrixU->matrix[i][j] = matrixF->matrix[i][j];
+      }  // end for
+   }  // end for
+
+   // raw algorithm
+   for (size_t k = 0; k < (matrixU->n_rows - 1); ++k) {
+      for (size_t i = 1 + k; i < matrixU->n_rows; ++i) {
+
+         double temp = matrixU->matrix[i][k];   // hold the scale factor
+         
+         for (size_t j = 0 + k; j < matrixU->n_cols; ++j) {
+            matrixU->matrix[i][j] -= (temp / matrixU->matrix[k][k]) * matrixU->matrix[k][j];
+         }  // end for
+      }  // end for
+   }  // end for
+
+   return matrixU;
+}  // end of luMatrixFactorization function
+
+// release the memory allocated dynamically
+int freeMatrix2D(Matrix2D* matrixPtr) {
+
+   // the most nested is released firts
    for (size_t k = 0; k < matrixPtr->n_rows; ++k) {
       free(matrixPtr->matrix[k]);
    }  // end for
