@@ -22,8 +22,8 @@ int matrix2DToDisk(Matrix2D*);
 int freeMatrix2D(Matrix2D*);
 
 int main() {
-   Matrix2D *matrix_A_ptr;          // matriz a ingresar por el usuario
-   Matrix2D *matrix_B_ptr;          // matriz a ingresar por el usuario
+   Matrix2D *matrix_A_ptr;          // input by user matrix
+   Matrix2D *matrix_B_ptr;          // imput by user matrix
    Matrix2D *matrix_AB_ptr;         // matrix multiplication result
    Matrix2D *matrix_L_ptr;          // matrix L (upper)
 
@@ -64,7 +64,7 @@ int main() {
    matrix_L_ptr = NULL;
 }  // end main
 
-// captura los elementos de la matriz
+// input the matrix elements
 Matrix2D* inputMatrix2D(void) {
    Matrix2D *matrix_in_ptr;
 
@@ -97,7 +97,7 @@ Matrix2D* inputMatrix2D(void) {
    return matrix_in_ptr;
 }  // end of function inputMatrix2D
 
-// escribe la matriz a un archivo de disco
+// write the matrix into a file disk
 int matrix2DToDisk(Matrix2D *matrixPtr) {
    FILE *file_ptr;   // disk file
 
@@ -158,7 +158,7 @@ Matrix2D* matrixMultiplication(Matrix2D* matrixA, Matrix2D* matrixB) {
    return matrixAB;
 }  // end of matrixMultiplication function
 
-// LU Matrix factorization
+// Upper Triangular Matrix computation
 Matrix2D* upperTriangularMatrix(Matrix2D* matrixF) {
    Matrix2D *matrixU;   // upper matrix
 
