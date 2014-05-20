@@ -9,8 +9,8 @@ using namespace std;
 
 // matrix structure
 typedef struct {
-   int n_rows;       // number of rows
-   int n_cols;       // number of columns
+   size_t n_rows;    // number of rows
+   size_t n_cols;    // number of columns
    double **matrix;  // n_rows x n_cols matrix
 } Matrix2D;
 
@@ -20,6 +20,7 @@ Matrix2D* matrixMultiplication(Matrix2D*, Matrix2D*);
 Matrix2D* upperTriangularMatrix(Matrix2D*);
 double matrixDeterminant(Matrix2D* matrixD);
 int matrix2DToDisk(Matrix2D*);
+void setMemoryAllocation(Matrix2D*, size_t, size_t);
 int freeMatrix2D(Matrix2D*);
 
 int main() {
@@ -36,6 +37,10 @@ int main() {
    try {
       matrix_AB_ptr = matrixMultiplication(matrix_A_ptr, matrix_B_ptr);
 
+      determinant = matrixDeterminant(matrix_A_ptr);
+
+      cout << "determinant: " << determinant << endl;
+
       matrix2DToDisk(matrix_AB_ptr);   // write the matrix into a disk file
 
       freeMatrix2D(matrix_AB_ptr);     // release allocated memory
@@ -46,10 +51,6 @@ int main() {
 
    try {
       matrix_L_ptr = upperTriangularMatrix(matrix_A_ptr);
-
-      determinant = matrixDeterminant(matrix_A_ptr);
-
-      cout << "determinant: " << determinant << endl;
 
       matrix2DToDisk(matrix_L_ptr);
 
@@ -186,20 +187,24 @@ double matrixDeterminant(Matrix2D* matrixD) {
    double det;          // determinant
    Matrix2D *matrixU;   // upper triangular matrix
 
-   // dynamic allocation memory
-   matrixU = (Matrix2D*)calloc(1, sizeof(Matrix2D));
+   //// dynamic allocation memory
+   //matrixU = (Matrix2D*)calloc(1, sizeof(Matrix2D));
 
-   // sizing matrix U
-   matrixU->n_rows = matrixD->n_rows;
-   matrixU->n_cols = matrixD->n_cols;
+   //// sizing matrix U
+   //matrixU->n_rows = matrixD->n_rows;
+   //matrixU->n_cols = matrixD->n_cols;
 
+   //// dynamic memory allocation
+   //matrixU->matrix = (double**)calloc(matrixU->n_rows, sizeof(double*));
+
+   //for (size_t k = 0; k < matrixU->n_rows; ++k) {
+   //   matrixU->matrix[k] = (double*)calloc(matrixU->n_cols, sizeof(double));
+   //}  // end for
+   
    // dynamic memory allocation
-   matrixU->matrix = (double**)calloc(matrixU->n_rows, sizeof(double*));
+   setMemoryAllocation(matrixU, matrixD->n_rows, matrixD->n_cols);
 
-   for (size_t k = 0; k < matrixU->n_rows; ++k) {
-      matrixU->matrix[k] = (double*)calloc(matrixU->n_cols, sizeof(double));
-   }  // end for
-
+   // getting the upper triangule matrix
    matrixU = upperTriangularMatrix(matrixD);
 
    // algorithm: getting the elements in the diagonal
@@ -208,6 +213,10 @@ double matrixDeterminant(Matrix2D* matrixD) {
    for (size_t i = 0; i < matrixU->n_rows; ++i) {
       det *= matrixU->matrix[i][i];
    }  // end for
+
+   // release allocated memory
+   freeMatrix2D(matrixU);
+   //freeMatrix2D(matrixD);
 
    return det;
 }  // end of function matrixDeterminant
@@ -238,6 +247,27 @@ int matrix2DToDisk(Matrix2D *matrixPtr) {
 
    return 0;   // exito en la escritura
 }  // end of function matrix2DToDisk
+
+// dynamic memory allocation, 2D array
+void setMemoryAllocation(Matrix2D* matrix2D_ptr, size_t rows, size_t cols) {
+//   Matrix2D *array2D;
+
+   // dynamic allocation memory
+   matrix2D_ptr = (Matrix2D*)calloc(1, sizeof(Matrix2D));
+
+   // sizing array 2D
+   matrix2D_ptr->n_rows = rows;
+   matrix2D_ptr->n_cols = cols;
+
+   // dynamic memory allocation
+   matrix2D_ptr->matrix = (double**)calloc(matrix2D_ptr->n_rows, sizeof(double*));
+
+   for (size_t k = 0; k < matrix2D_ptr->n_rows; ++k) {
+      matrix2D_ptr->matrix[k] = (double*)calloc(matrix2D_ptr->n_cols, sizeof(double));
+   }  // end for
+   
+//   return array2D;
+}  // end function setMemoryAllocation
 
 // release the memory allocated dynamically
 int freeMatrix2D(Matrix2D* matrixPtr) {
