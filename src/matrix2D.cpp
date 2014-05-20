@@ -20,7 +20,7 @@ Matrix2D* matrixMultiplication(Matrix2D*, Matrix2D*);
 Matrix2D* upperTriangularMatrix(Matrix2D*);
 double matrixDeterminant(Matrix2D* matrixD);
 int matrix2DToDisk(Matrix2D*);
-void setMemoryAllocation(Matrix2D*, size_t, size_t);
+Matrix2D* setMemoryAllocation(Matrix2D*, size_t, size_t);
 int freeMatrix2D(Matrix2D*);
 
 int main() {
@@ -37,13 +37,19 @@ int main() {
    try {
       matrix_AB_ptr = matrixMultiplication(matrix_A_ptr, matrix_B_ptr);
 
+      //matrix_L_ptr = upperTriangularMatrix(matrix_A_ptr);
+
       determinant = matrixDeterminant(matrix_A_ptr);
 
       cout << "determinant: " << determinant << endl;
 
       matrix2DToDisk(matrix_AB_ptr);   // write the matrix into a disk file
 
-      freeMatrix2D(matrix_AB_ptr);     // release allocated memory
+      // freeing memory allocaded dynamically
+      //freeMatrix2D(matrix_A_ptr);
+      //freeMatrix2D(matrix_B_ptr);
+      //freeMatrix2D(matrix_AB_ptr);     // release allocated memory
+      //freeMatrix2D(matrix_L_ptr);
    }  // end try
    catch (IllegalSizeException &illegalSizeException) {
       cout << "Exception occurred: " << illegalSizeException.what() << endl;
@@ -54,7 +60,9 @@ int main() {
 
       matrix2DToDisk(matrix_L_ptr);
 
-      freeMatrix2D(matrix_L_ptr);
+      //freeMatrix2D(matrix_A_ptr);
+
+      //freeMatrix2D(matrix_L_ptr);
    }  // end try
    catch (IllegalSizeException &illegalSizeException) {
       cout << "Exception occurred: " << illegalSizeException.what() << endl;
@@ -63,6 +71,8 @@ int main() {
    // freeing memory allocaded dynamically
    freeMatrix2D(matrix_A_ptr);
    freeMatrix2D(matrix_B_ptr);
+   freeMatrix2D(matrix_AB_ptr);
+   freeMatrix2D(matrix_L_ptr);
    
    // zero pointers after free to avoid reuse
    matrix_A_ptr = NULL;
@@ -113,18 +123,21 @@ Matrix2D* matrixMultiplication(Matrix2D* matrixA, Matrix2D* matrixB) {
       throw IllegalSizeException(); // terminate function
 
    // dynamic memory allocation
-   matrixAB = (Matrix2D*)calloc(1, sizeof(Matrix2D));
+   //matrixAB = (Matrix2D*)calloc(1, sizeof(Matrix2D));
 
-   // sizing matrix A*B
-   matrixAB->n_rows = matrixA->n_rows;
-   matrixAB->n_cols = matrixB->n_cols;
+   //// sizing matrix A*B
+   //matrixAB->n_rows = matrixA->n_rows;
+   //matrixAB->n_cols = matrixB->n_cols;
 
+   //// dynamic memory allocation
+   //matrixAB->matrix = (double**)calloc(matrixAB->n_rows, sizeof(double*));
+
+   //for (size_t k = 0; k < matrixAB->n_rows; ++k) {
+   //   matrixAB->matrix[k] = (double*)calloc(matrixAB->n_cols, sizeof(double));
+   //}  // end for
+   
    // dynamic memory allocation
-   matrixAB->matrix = (double**)calloc(matrixAB->n_rows, sizeof(double*));
-
-   for (size_t k = 0; k < matrixAB->n_rows; ++k) {
-      matrixAB->matrix[k] = (double*)calloc(matrixAB->n_cols, sizeof(double));
-   }  // end for
+   matrixAB = setMemoryAllocation(matrixAB, matrixA->n_rows, matrixB->n_cols);
 
    // raw algorithm
    for (size_t i = 0; i < matrixA->n_rows; ++i) {
@@ -140,25 +153,28 @@ Matrix2D* matrixMultiplication(Matrix2D* matrixA, Matrix2D* matrixB) {
 
 // Upper Triangular Matrix computation
 Matrix2D* upperTriangularMatrix(Matrix2D* matrixF) {
-   Matrix2D *matrixU;   // upper matrix
+   Matrix2D *matrixU;   // upper triangular matrix
 
    // checking proper size
    if (matrixF->n_rows != matrixF->n_cols)
       throw IllegalSizeException(); // terminate function
 
    // dynamic allocation memory
-   matrixU = (Matrix2D*)calloc(1, sizeof(Matrix2D));
+   //matrixU = (Matrix2D*)calloc(1, sizeof(Matrix2D));
 
-   // sizing matrix U
-   matrixU->n_rows = matrixF->n_rows;
-   matrixU->n_cols = matrixF->n_cols;
+   //// sizing matrix U
+   //matrixU->n_rows = matrixF->n_rows;
+   //matrixU->n_cols = matrixF->n_cols;
 
+   //// dynamic memory allocation
+   //matrixU->matrix = (double**)calloc(matrixU->n_rows, sizeof(double*));
+
+   //for (size_t k = 0; k < matrixU->n_rows; ++k) {
+   //   matrixU->matrix[k] = (double*)calloc(matrixU->n_cols, sizeof(double));
+   //}  // end for
+   
    // dynamic memory allocation
-   matrixU->matrix = (double**)calloc(matrixU->n_rows, sizeof(double*));
-
-   for (size_t k = 0; k < matrixU->n_rows; ++k) {
-      matrixU->matrix[k] = (double*)calloc(matrixU->n_cols, sizeof(double));
-   }  // end for
+   matrixU = setMemoryAllocation(matrixU, matrixF->n_rows, matrixF->n_cols);
 
    // TODO: Optimize assigment, if possible
    for (size_t i = 0; i < matrixU->n_rows; ++i) {
@@ -166,6 +182,7 @@ Matrix2D* upperTriangularMatrix(Matrix2D* matrixF) {
          matrixU->matrix[i][j] = matrixF->matrix[i][j];
       }  // end for
    }  // end for
+   //matrixU = matrixF;
 
    // raw algorithm
    for (size_t k = 0; k < (matrixU->n_rows - 1); ++k) {
@@ -202,13 +219,13 @@ double matrixDeterminant(Matrix2D* matrixD) {
    //}  // end for
    
    // dynamic memory allocation
-   setMemoryAllocation(matrixU, matrixD->n_rows, matrixD->n_cols);
+   //matrixU = setMemoryAllocation(matrixU, matrixD->n_rows, matrixD->n_cols);
 
    // getting the upper triangule matrix
    matrixU = upperTriangularMatrix(matrixD);
 
    // algorithm: getting the elements in the diagonal
-   det = 1; // initialization, just for multiplicative identity
+   det = 1; // initialization, multiplicative identity
    
    for (size_t i = 0; i < matrixU->n_rows; ++i) {
       det *= matrixU->matrix[i][i];
@@ -249,7 +266,7 @@ int matrix2DToDisk(Matrix2D *matrixPtr) {
 }  // end of function matrix2DToDisk
 
 // dynamic memory allocation, 2D array
-void setMemoryAllocation(Matrix2D* matrix2D_ptr, size_t rows, size_t cols) {
+Matrix2D* setMemoryAllocation(Matrix2D* matrix2D_ptr, size_t rows, size_t cols) {
 //   Matrix2D *array2D;
 
    // dynamic allocation memory
@@ -265,6 +282,9 @@ void setMemoryAllocation(Matrix2D* matrix2D_ptr, size_t rows, size_t cols) {
    for (size_t k = 0; k < matrix2D_ptr->n_rows; ++k) {
       matrix2D_ptr->matrix[k] = (double*)calloc(matrix2D_ptr->n_cols, sizeof(double));
    }  // end for
+
+   //return 0;
+   return matrix2D_ptr;
    
 //   return array2D;
 }  // end function setMemoryAllocation
