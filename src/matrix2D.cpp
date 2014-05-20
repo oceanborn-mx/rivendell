@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
+#include <iomanip>
 #include "IllegalSizeException.h"   // IllegalSizeException class
 using namespace std;
 
@@ -43,6 +45,7 @@ int main() {
       cout << "Exception occurred: " << illegalSizeException.what() << endl;
    }  // end catch
    
+   // upper triangula matrix
    try {
       matrix_L_ptr = upperTriangularMatrix(matrix_A_ptr);
 
@@ -54,6 +57,7 @@ int main() {
       cout << "Exception occurred: " << illegalSizeException.what() << endl;
    }  // end catch
 
+   // determinant
    try {
       determinant = matrixDeterminant(matrix_A_ptr);
 
@@ -63,12 +67,9 @@ int main() {
       cout << "Exception occurred: " << illegalSizeException.what() << endl;
    }  // end catch
 
-
    // freeing memory allocaded dynamically
    freeMatrix2D(matrix_A_ptr);
    freeMatrix2D(matrix_B_ptr);
-   //freeMatrix2D(matrix_AB_ptr);
-   //freeMatrix2D(matrix_L_ptr);
    
    // zero pointers after free to avoid reuse
    matrix_A_ptr = NULL;
@@ -193,29 +194,28 @@ double matrixDeterminant(Matrix2D* matrixD) {
 
 // write the matrix into a file disk
 int matrix2DToDisk(Matrix2D *matrixPtr) {
-   FILE *file_ptr;   // disk file
+   ofstream diskFile;   // disk file
 
    // opening the file
-   file_ptr = (FILE*)fopen("Matrix.txt", "w");
+   diskFile.open("Matrix.txt", ios::out);
 
-   if (file_ptr == NULL) {
-      cout << "Error en la apertura del archivo!";
-      exit(0);
+   if (!diskFile) {
+      cerr << "File could not be opened!";
+      exit(EXIT_FAILURE);
    }  // end if
 
    // writing the file
    for (size_t rows = 0; rows < matrixPtr->n_rows; ++rows) {
       for (size_t cols = 0; cols < matrixPtr->n_cols; ++cols) {
-         fprintf(file_ptr, "%7.2f\t", 
-                 matrixPtr->matrix[rows][cols]);
+         diskFile << setw(7) << setprecision(2) << matrixPtr->matrix[rows][cols];
       }  // end for
-      fprintf(file_ptr, "\n");
+      diskFile << endl;
    }  // end for
 
    // closing the file
-   fclose(file_ptr);
+   diskFile.close();
 
-   return 0;   // exito en la escritura
+   return 0;   // successful writing
 }  // end of function matrix2DToDisk
 
 // dynamic memory allocation, 2D array
@@ -252,5 +252,5 @@ int freeMatrix2D(Matrix2D* matrixPtr) {
    free(matrixPtr->matrix);
    free(matrixPtr);
 
-   return 0;   // exito en la liberacion de memoria
+   return 0;   // release successful
 }  // end of function freeMatrix2D
