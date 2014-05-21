@@ -20,6 +20,7 @@ typedef struct {
 Matrix2D* inputMatrix2D(void);
 Matrix2D* matrixMultiplication(Matrix2D*, Matrix2D*);
 Matrix2D* upperTriangularMatrix(Matrix2D*);
+Matrix2D* lowerTriangularMatrix(Matrix2D*);
 double matrixDeterminant(Matrix2D* matrixD);
 int matrix2DToDisk(Matrix2D*);
 Matrix2D* setMemoryAllocation(Matrix2D*, size_t, size_t);
@@ -47,7 +48,8 @@ int main() {
    
    // upper triangula matrix
    try {
-      matrix_L_ptr = upperTriangularMatrix(matrix_A_ptr);
+      //matrix_L_ptr = upperTriangularMatrix(matrix_A_ptr);
+      matrix_L_ptr = lowerTriangularMatrix(matrix_A_ptr);
 
       matrix2DToDisk(matrix_L_ptr);
 
@@ -167,6 +169,42 @@ Matrix2D* upperTriangularMatrix(Matrix2D* matrixF) {
 
    return matrixU;
 }  // end of luMatrixFactorization function
+
+// Lower Triangular Matrix computation
+Matrix2D* lowerTriangularMatrix(Matrix2D* matrixF) {
+   Matrix2D *matrixL;   // lower triangular matrix
+
+   // checking proper size
+   if (matrixF->n_rows != matrixF->n_cols)
+      throw IllegalSizeException(); // terminate function
+
+   // dynamic memory allocation
+   matrixL = setMemoryAllocation(matrixL, matrixF->n_rows, matrixF->n_cols);
+
+   // TODO: Optimize assigment, if possible
+   for (size_t i = 0; i < matrixL->n_rows; ++i) {
+      for (size_t j = 0; j < matrixL->n_cols; ++j) {
+         matrixL->matrix[i][j] = matrixF->matrix[i][j];
+      }  // end for
+   }  // end for
+   //matrixL = matrixF;
+
+   // TODO: verify the formal definition of a lower triangular matrix
+   // raw algorithm
+   for (int k = (matrixL->n_rows - 1); k >= 1; --k) {
+      for (int i = k - 1; i >= 0; --i) {
+
+         double temp = matrixL->matrix[i][k];   // hold the scale factor
+         
+         for (int j = k; j >= 0; --j) {
+            matrixL->matrix[i][j] -= (temp / matrixL->matrix[k][k]) * matrixL->matrix[k][j];
+            cout << "cols " << j << endl;
+         }  // end for
+      }  // end for
+   }  // end for
+
+   return matrixL;
+}  // end of lowerTriangularMatrix function
 
 // Determinant
 double matrixDeterminant(Matrix2D* matrixD) {
